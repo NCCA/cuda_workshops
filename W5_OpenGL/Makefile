@@ -182,7 +182,7 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA
 INCLUDES  := -I../../common/inc -I/usr/include/cuda -I../shared/include -I./include -I../shared -I$(CUDA_SAMPLES)/common/inc
-LIBRARIES := -I/usr/include/cuda -lcurand -lGL -lGLU -lX11 -lXi -lXmu -lglut -lGLEW
+LIBRARIES := -I/usr/include/cuda -lcurand -lGL -lGLU -lX11 -lXi -lglut -lGLEW
 
 ################################################################################
 
