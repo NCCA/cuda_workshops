@@ -69,8 +69,14 @@ __device__ float3 signedDistanceNormal(const float3 &pos) {
 /**
  * Taken from here https://www.iquilezles.org/www/articles/palettes/palettes.htm
  */
-__device__ float3 palette(const float t,  const float3 a, const float3 b, const float3 c, const float3 d )
+__device__ float3 palette(const float t)
 {
+    // Should store all this in const memory
+    float3 a = make_float3(0.5, 0.5, 0.5);
+    float3 b = make_float3(0.5, 0.5, 0.5);
+    float3 c = make_float3(1.0, 1.0, 1.0);
+    float3 d = make_float3(0.00, 0.33, 0.67);
+    
     float3 tmp = c*t+d; // This is needed for cos isn't defined on float3's
     return a + b*make_float3(cos(6.28318*tmp.x),cos(6.28318*tmp.y),cos(6.28318*tmp.z));
 }
@@ -86,12 +92,52 @@ __global__ void colourSDF(float *buffer) {
                                   float(y)/1023.0,
                                   0.5f);
 
+    // Set this to something interesting to get the pattern repeating
+    float scale = 10.0f;
+
+    // Write the value calculated from our signed distance to the buffer    
+    float3 colour = palette(signedDistance(pixelPos) * scale);
+
+    // Write out the colour values.
+    buffer[(x + y*1024)*3 + 0] = colour.x;
+    buffer[(x + y*1024)*3 + 1] = colour.y;
+    buffer[(x + y*1024)*3 + 2] = colour.z;
+}
+
+
+/**
+ *  A function to generate a Mandlebrot fractal adapted from http://nuclear.mutantstargoat.com/articles/sdr_fract/
+ */
+__global__ void colourMandelbrot(float *buffer) {
+    // The first thing we need to do is determine the pixel in SDF coordinates, i.e. between 0 and 1    
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    float3 pixelPos = make_float3(float(x)/1023.0, 
+                                  float(y)/1023.0,
+                                  0.5f);
+
+    float2 z, c;
+    float2 center = make_float2(0.5f,0.5f);
+    float scale = 1.0f;
+    int iter = 100;
+    c.x = (pixelPos.x - 0.5f) * scale - center.x;
+    c.y = (pixelPos.y - 0.5f) * scale - center.y;
+
+    int i;
+    z = c;
+    float fx,fy;
+    for(i=0; i<iter; i++) {
+        fx = (z.x * z.x - z.y * z.y) + c.x;
+        fy = (z.y * z.x + z.x * z.y) + c.y;
+
+        if((fx*fx + fy*fy) > 4.0f) break;
+        z.x = fx;
+        z.y = fy;
+    }
+    float t = (i == iter ? 0.0f : float(i) * 0.001f);
+
     // Write the value calculated from our signed distance to the buffer
-    float3 colour =      palette(signedDistance(pixelPos) * 10.0f,
-                                 make_float3(0.5, 0.5, 0.5),	
-                                 make_float3(0.5, 0.5, 0.5), 
-                                 make_float3(1.0, 1.0, 1.0), 
-                                 make_float3(0.00, 0.10, 0.20));
+    float3 colour = palette(t);
     buffer[(x + y*1024)*3 + 0] = colour.x;
     buffer[(x + y*1024)*3 + 1] = colour.y;
     buffer[(x + y*1024)*3 + 2] = colour.z;
@@ -117,6 +163,7 @@ int main(void) {
 
     // If it's all good, use our kernel to render to the image
     colourSDF<<<gridDim, blockDim>>>(d_buffer);
+    //colourMandelbrot<<<gridDim, blockDim>>>(d_buffer);
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
         printf("Error: CUDA kernel launch failed. Reason: %s\n", cudaGetErrorString(err));
