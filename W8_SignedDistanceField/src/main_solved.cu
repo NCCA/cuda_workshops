@@ -38,7 +38,32 @@ int writeImage(const char *filename,
  * https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
  */
  __device__ float signedDistance(const float3 &pos) {
-    return 0.0;
+    // The default SDF is centered at the origin, so we need to transform the point as our cube centre is at [0.5,0.5,0.5]. The top corner
+    // is also given by [.5,.5,.5]. The final result is the distance of the vector from pos transformed to the top right quadrant to the corner
+    // of the cube. Note that the distance is SIGNED - negative means inside the cube, positive means outside.
+    float3 b = make_float3(0.5f,0.5f, 0.5f);
+    
+    float3 zero = make_float3(0.0f, 0.0f, 0.0f);
+    float3 d = fabs(pos - b) - b;
+    float d_box = fminf(fmaxf(d.x, fmaxf(d.y, d.z)), 0.0) + length(fmaxf(d,zero));
+    
+    // The result below is for a sphere bounding the fluid
+    float r = 0.5f; // The radius of the sphere
+    float d_sphere = length(pos - make_float3(0.5f)) - r;    
+    return d_sphere;
+}
+
+/**
+ * Compute the normal at a position based on the SDF function.
+ */
+__device__ float3 signedDistanceNormal(const float3 &pos) {
+    float eps = 0.0001f;
+            
+    // Assume that the normal evaluated at this point in the SDF is close enough to the surface normal (a mistake?)
+    return normalize(make_float3(signedDistance(make_float3(pos.x + eps, pos.y, pos.z)) - signedDistance(make_float3(pos.x - eps, pos.y, pos.z)),
+                                 signedDistance(make_float3(pos.x, pos.y + eps, pos.z)) - signedDistance(make_float3(pos.x, pos.y - eps, pos.z)),
+                                 signedDistance(make_float3(pos.x, pos.y, pos.z + eps)) - signedDistance(make_float3(pos.x, pos.y, pos.z - eps))));
+    
 }
 
 /**
@@ -63,13 +88,60 @@ __global__ void colourSDF(float *buffer) {
     // The first thing we need to do is determine the pixel in SDF coordinates, i.e. between 0 and 1    
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
+    float3 pixelPos = make_float3(float(x)/1023.0, 
+                                  float(y)/1023.0,
+                                  0.5f);
+
+    // Set this to something interesting to get the pattern repeating
+    float scale = 10.0f;
+
+    // Write the value calculated from our signed distance to the buffer    
+    float3 colour = palette(signedDistance(pixelPos) * scale);
 
     // Write out the colour values.
-    buffer[(x + y*1024)*3 + 0] = 0.5f;
-    buffer[(x + y*1024)*3 + 1] = 0.5f;
-    buffer[(x + y*1024)*3 + 2] = 0.5f;
+    buffer[(x + y*1024)*3 + 0] = colour.x;
+    buffer[(x + y*1024)*3 + 1] = colour.y;
+    buffer[(x + y*1024)*3 + 2] = colour.z;
 }
 
+
+/**
+ *  A function to generate a Mandlebrot fractal adapted from http://nuclear.mutantstargoat.com/articles/sdr_fract/
+ */
+__global__ void colourMandelbrot(float *buffer) {
+    // The first thing we need to do is determine the pixel in SDF coordinates, i.e. between 0 and 1    
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    float3 pixelPos = make_float3(float(x)/1023.0, 
+                                  float(y)/1023.0,
+                                  0.5f);
+
+    float2 z, c;
+    float2 center = make_float2(0.5f,0.5f);
+    float scale = 1.0f;
+    int iter = 100;
+    c.x = (pixelPos.x - 0.5f) * scale - center.x;
+    c.y = (pixelPos.y - 0.5f) * scale - center.y;
+
+    int i;
+    z = c;
+    float fx,fy;
+    for(i=0; i<iter; i++) {
+        fx = (z.x * z.x - z.y * z.y) + c.x;
+        fy = (z.y * z.x + z.x * z.y) + c.y;
+
+        if((fx*fx + fy*fy) > 4.0f) break;
+        z.x = fx;
+        z.y = fy;
+    }
+    float t = (i == iter ? 0.0f : float(i) * 0.001f);
+
+    // Write the value calculated from our signed distance to the buffer
+    float3 colour = palette(t);
+    buffer[(x + y*1024)*3 + 0] = colour.x;
+    buffer[(x + y*1024)*3 + 1] = colour.y;
+    buffer[(x + y*1024)*3 + 2] = colour.z;
+}
 
 /**
  * Host main routine
