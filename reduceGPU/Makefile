@@ -78,8 +78,8 @@ EXTRA_NVCCFLAGS ?= -lineinfo
 EXTRA_LDFLAGS   ?=
 
 # CUDA code generation flags
-GENCODE_SM11    := -gencode arch=compute_11,code=sm_11
-GENCODE_SM20    := -gencode arch=compute_20,code=sm_20
+GENCODE_SM11    := #-gencode arch=compute_11,code=sm_11
+GENCODE_SM20    := #-gencode arch=compute_20,code=sm_20
 GENCODE_SM30    := -gencode arch=compute_30,code=sm_30 
 GENCODE_FLAGS   := $(GENCODE_SM11) $(GENCODE_SM20) $(GENCODE_SM30) 
 

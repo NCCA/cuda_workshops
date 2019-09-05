@@ -20,7 +20,7 @@
 
 // Utilities and timing functions
 //#include <helper_functions.h>    // includes cuda.h and cuda_runtime_api.h
-#include <timer.h>               // timing functions
+//#include <timer.h>               // timing functions
 
 // CUDA helper functions
 #include <helper_cuda.h>         // helper functions for CUDA error check
