@@ -17,3 +17,5 @@ rand/.gitignore
 rand/Makefile
 rand/obj/
 rand/rand
+CMakeCache.txt
+CMakeFiles
