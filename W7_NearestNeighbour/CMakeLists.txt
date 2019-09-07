@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+project(W7_NearestNeighbour LANGUAGES CXX CUDA)
+add_executable(nnei src/main.cu  ../shared/src/random.cu)
+include_directories(../shared/include  /usr/local/cuda-9.0/samples/common/inc/)
+target_link_libraries(nnei curand)

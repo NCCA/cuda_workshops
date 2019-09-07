@@ -123,6 +123,33 @@ pointHash/fast:
 	$(MAKE) -f CMakeFiles/pointHash.dir/build.make CMakeFiles/pointHash.dir/build
 .PHONY : pointHash/fast
 
+home/jmacey/cuda_workshops/shared/src/random.o: home/jmacey/cuda_workshops/shared/src/random.cu.o
+
+.PHONY : home/jmacey/cuda_workshops/shared/src/random.o
+
+# target to build an object file
+home/jmacey/cuda_workshops/shared/src/random.cu.o:
+	$(MAKE) -f CMakeFiles/pointHash.dir/build.make CMakeFiles/pointHash.dir/home/jmacey/cuda_workshops/shared/src/random.cu.o
+.PHONY : home/jmacey/cuda_workshops/shared/src/random.cu.o
+
+home/jmacey/cuda_workshops/shared/src/random.i: home/jmacey/cuda_workshops/shared/src/random.cu.i
+
+.PHONY : home/jmacey/cuda_workshops/shared/src/random.i
+
+# target to preprocess a source file
+home/jmacey/cuda_workshops/shared/src/random.cu.i:
+	$(MAKE) -f CMakeFiles/pointHash.dir/build.make CMakeFiles/pointHash.dir/home/jmacey/cuda_workshops/shared/src/random.cu.i
+.PHONY : home/jmacey/cuda_workshops/shared/src/random.cu.i
+
+home/jmacey/cuda_workshops/shared/src/random.s: home/jmacey/cuda_workshops/shared/src/random.cu.s
+
+.PHONY : home/jmacey/cuda_workshops/shared/src/random.s
+
+# target to generate assembly for a file
+home/jmacey/cuda_workshops/shared/src/random.cu.s:
+	$(MAKE) -f CMakeFiles/pointHash.dir/build.make CMakeFiles/pointHash.dir/home/jmacey/cuda_workshops/shared/src/random.cu.s
+.PHONY : home/jmacey/cuda_workshops/shared/src/random.cu.s
+
 src/main.o: src/main.cu.o
 
 .PHONY : src/main.o
@@ -159,6 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... pointHash"
+	@echo "... home/jmacey/cuda_workshops/shared/src/random.o"
+	@echo "... home/jmacey/cuda_workshops/shared/src/random.i"
+	@echo "... home/jmacey/cuda_workshops/shared/src/random.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
