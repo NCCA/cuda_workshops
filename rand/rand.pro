@@ -33,10 +33,10 @@ CUDA_LIBS = -L${CUDA_PATH}/lib64 -L/usr/lib/x86_64-linux-gnu -lcudart -lcurand -
 CUDA_INC+= $$join(INCLUDEPATH,' -I','-I',' ')
  
 ## NVCC_OPTIONS - any further options for the compiler
-NVCC_OPTIONS += --compiler-options -use_fast_math --ptxas-options=-v
+NVCC_OPTIONS +=   --ptxas-options=-v
  
 # nvcc flags (ptxas option verbose is always useful)
-NVCCFLAGS = -ccbin $$(HOST_COMPILER) --compiler-options -use_fast_math #--ptxas-options=-v
+NVCCFLAGS = -ccbin $$(HOST_COMPILER)  # -use_fast_math #--ptxas-options=-v
  
 #prepare intermediat cuda compiler
 cudaIntr.input = CUDA_SOURCES

@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+project(W2_PointHash LANGUAGES CXX CUDA)
+add_executable(pointHash src/main.cu ../shared/src/random.cu)
+include_directories(../shared/include/)
+target_link_libraries(pointHash curand )

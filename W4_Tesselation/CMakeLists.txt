@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+project(W4_Tesselation LANGUAGES CXX CUDA)
+add_executable(tess src/main.cu ../shared/src/random.cu)
+include_directories(../shared/ ../shared/include include )
+target_link_libraries(tess curand )

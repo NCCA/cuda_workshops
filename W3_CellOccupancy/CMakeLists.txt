@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+project(W3_CellOccupancy LANGUAGES CXX CUDA)
+add_executable(gridOcc src/main.cu ../shared/src/random.cu)
+include_directories(../shared/include/)
+target_link_libraries(gridOcc curand )
